@@ -1,0 +1,111 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+
+\usepackage{minted}
+
+\title{Архитектура ЭВМ и язык ассемблера}
+\author{Лисид Лаконский}
+\date{February 2023}
+
+\begin{document}
+\raggedright
+
+\maketitle
+\tableofcontents
+\pagebreak
+
+\section{Архитектура ЭВМ и язык ассемблера - 01.02.2023}
+
+\textbf{Ассемблер} – \textbf{машинно-ориентированный язык} и позволяет максимально использовать ресурсы процессора.
+
+Ассемблер \textbf{тесно связан с архитектурой}.
+
+Ассемблер – \textbf{мнемоническое отображение команд процессора}.
+
+\hfill
+
+\textbf{Стадии выполнения операции}: \textbf{считывается код команды} — \textbf{считывается первый аргумент} — \textbf{считывается второй аргумент} — \textbf{выполнение операции} — \textbf{пересылка операции}
+
+\hfill
+
+\textbf{Этапы создания программы}:
+
+\begin{enumerate}
+    \item Создание текстового файла с мнемонической записью
+    \item Создание объектного модуля программы — результат трансляции без привязки к библиотечным модулям и адресам
+    \item Компоновка (линковка) — привязка модулей и адресов
+    \item Вывод загрузочного модуля
+\end{enumerate}
+
+Во время компоновки может быть прикреплен \textbf{отладчик}
+
+Отладчики бывают нескольких видов:
+
+\begin{enumerate}
+    \item \textbf{Объектный} — проверяет только сам исполняемый файл
+    \item \textbf{Системный} — проверяет работу программы в системе
+\end{enumerate}
+
+\hfill
+
+\textbf{BIOS} обеспечивает только ввод и вывод, операционная система — это другое
+
+\textbf{Макросы} подставляются на этапе трансляции
+
+Существует множество трансляторов языка ассемблера: MASM, NASM, TASM и другие
+
+\hfill
+
+\textbf{COM} формат исполняемых файлов не имеет заголовка, его максимальный размер — 64 Кб
+
+\textbf{EXE} улучшен относительно COM, не ограничен по размеру, может содержать несколько сегментов кода
+
+\pagebreak
+\subsection{Hello, world}
+
+\subsubsection{TASM/NASM, MS DOS}
+
+\begin{minted}{tasm}
+section .text
+	org 0x100
+	mov ah, 0x9
+	mov dx, hello
+	int 0x21
+	mov ax, 0x4c
+	mov al, 0
+	int 0x21
+
+section .data
+	hello DB "Hello, world!", 0xd, 0xa, '$'
+\end{minted}
+
+\subsubsection{NASM, UNIX}
+
+\begin{minted}{nasm}
+global _start
+
+section .data
+    ; String, which is just a collection of bytes, 0xA is newline
+    str:     db 'Hello, world!',0xA
+    strLen:  equ $-str
+
+section .bss
+
+section .text
+_start:
+    mov     edx, strLen     ; Arg three: the length of the string
+    mov     ecx, str        ; Arg two: the address of the string
+    mov     ebx, 1          ; Arg one: file descriptor, in this case stdout
+    mov     eax, 4          ; Syscall number, in this case the write(2) syscall: 
+    int     0x80            ; Interrupt 0x80        
+
+    mov     ebx, 0          ; Arg one: the status
+    mov     eax, 1          ; Syscall number:
+    int     0x80
+\end{minted}
+
+\end{document}
